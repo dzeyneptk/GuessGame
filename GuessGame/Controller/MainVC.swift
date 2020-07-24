@@ -33,8 +33,11 @@ class MainVC: UIViewController {
     
     // MARK: - IBAction Functions
     @IBAction func newGameClicked(_ sender: Any) {
+        data.removeAll()
+        self.tableViewGuess.reloadData()
         randomString = RandomNumber().fourDigitNumber
         print(randomString)
+        showToast(controller: self, message: "Let's start!", seconds: 2)
     }
     
     // MARK: - Private Functions
@@ -53,9 +56,9 @@ class MainVC: UIViewController {
     
     private func checkDigits(number: String?) -> String {
         var placeDigit = ""
-        for number in 0 ..< (randomString.count) {
-            if (randomString.contains(Array(textFieldMain.text ?? "")[number])) {
-                if (Array(randomString)[number] == Array(textFieldMain.text ?? "")[number]) {
+        for i in 0 ..< (randomString.count) {
+            if (randomString.contains(Array(textFieldMain.text ?? "")[i])) {
+                if (Array(randomString)[i] == Array(textFieldMain.text ?? "")[i]) {
                     placeDigit += "+"
                 }
                 else {
@@ -65,6 +68,17 @@ class MainVC: UIViewController {
         }
         return placeDigit
     }
+    
+    private func showToast(controller: UIViewController, message: String, seconds: Double) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.view.backgroundColor = UIColor.black
+        alert.view.alpha = 0.6
+        alert.view.layer.cornerRadius = 15
+        controller.present(alert, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + seconds) {
+            alert.dismiss(animated: true)
+        }
+    }
 }
 
 // MARK: - UITextFieldDelegate
@@ -73,7 +87,7 @@ extension MainVC: UITextFieldDelegate {
         if let nextField = textField.superview?.viewWithTag(textField.tag + 1) as? UITextField {
             nextField.becomeFirstResponder()
         } else {
-            self.data = [CellData.init(guess: textFieldMain.text ?? "", placeOfDigits: checkDigits(number: textFieldMain.text ?? ""))]
+            self.data.append(contentsOf: [CellData.init(guess: textFieldMain.text ?? "", placeOfDigits: checkDigits(number: textFieldMain.text ?? ""))])
             textField.resignFirstResponder()
             self.tableViewGuess.reloadSections(NSIndexSet(index: 0) as IndexSet, with: .automatic)
         }
@@ -93,6 +107,7 @@ extension MainVC: UITableViewDelegate, UITableViewDataSource {
         cell.placesOfDigits = data[indexPath.row].placeOfDigits
         cell.textLabel?.lineBreakMode = .byWordWrapping
         cell.textLabel?.numberOfLines = 0
+        cell.textLabel?.textColor = UIColor.white
         cell.backgroundColor = UIColor.clear
         return cell
     }

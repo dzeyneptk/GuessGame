@@ -12,7 +12,7 @@ class RandomNumber {
      var result = ""
      repeat {
          result = String(format:"%04d", arc4random_uniform(10000) )
-     } while Set<Character>(result).count < 4 && !(Set<Character>(result).firstIndex(of: "0") != nil)
+     } while Set<Character>(result).count < 4 || Int(result)! < 1000
      return result
     }
 }

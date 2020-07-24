@@ -9,7 +9,11 @@
 import UIKit
 
 class MainVC: UIViewController {
-
+    struct CellData {
+        let guess : String?
+        let placeOfDigits : String?
+    }
+    
     // MARK: - IBOutlets
     @IBOutlet weak var textFieldMain: UITextField!
     @IBOutlet weak var tableViewGuess: UITableView!
@@ -19,12 +23,14 @@ class MainVC: UIViewController {
     // MARK: - Private variables
     private var fromTextField = ""
     private var randomString = ""
+    private var data = [CellData]()
     
     // MARK: - Override Functions
     override func viewDidLoad() {
         super.viewDidLoad()
         configureTextField()
         configureTableView()
+        self.data = [CellData.init(guess: "", placeOfDigits: "")]
     }
     
     // MARK: - IBAction Functions
@@ -42,8 +48,8 @@ class MainVC: UIViewController {
         self.tableViewGuess.delegate = self
         self.tableViewGuess.dataSource = self
         self.tableViewGuess.tableHeaderView = labelPrevious
-        self.tableViewGuess.backgroundColor = UIColor.white
-        self.tableViewGuess.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        self.tableViewGuess.backgroundColor = UIColor.clear
+        self.tableViewGuess.register(CustomCell.self, forCellReuseIdentifier: "custom")
     }
 }
 
@@ -63,17 +69,16 @@ extension MainVC: UITextFieldDelegate {
 // MARK: - UITableViewDelegate, UITableViewDataSource
 extension MainVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return data.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        let cell = self.tableViewGuess.dequeueReusableCell(withIdentifier: "custom") as! CustomCell
+        cell.guess = data[indexPath.row].guess
+        cell.placesOfDigits = data[indexPath.row].placeOfDigits
         cell.textLabel?.lineBreakMode = .byWordWrapping
         cell.textLabel?.numberOfLines = 0
         cell.backgroundColor = UIColor.clear
         return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     }
 }

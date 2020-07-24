@@ -21,7 +21,6 @@ class MainVC: UIViewController {
     @IBOutlet weak var buttonNewGame: UIButton!
     
     // MARK: - Private variables
-    private var fromTextField = ""
     private var randomString = ""
     private var data = [CellData]()
     
@@ -30,7 +29,6 @@ class MainVC: UIViewController {
         super.viewDidLoad()
         configureTextField()
         configureTableView()
-        self.data = [CellData.init(guess: "", placeOfDigits: "")]
     }
     
     // MARK: - IBAction Functions
@@ -44,6 +42,7 @@ class MainVC: UIViewController {
         self.textFieldMain.delegate = self
         self.textFieldMain.tag = 0
     }
+    
     private func configureTableView(){
         self.tableViewGuess.delegate = self
         self.tableViewGuess.dataSource = self
@@ -51,18 +50,34 @@ class MainVC: UIViewController {
         self.tableViewGuess.backgroundColor = UIColor.clear
         self.tableViewGuess.register(CustomCell.self, forCellReuseIdentifier: "custom")
     }
+    
+    private func checkDigits(number: String?) -> String {
+        var placeDigit = ""
+        for number in 0 ..< (randomString.count) {
+            if (randomString.contains(Array(textFieldMain.text ?? "")[number])) {
+                if (Array(randomString)[number] == Array(textFieldMain.text ?? "")[number]) {
+                    placeDigit += "+"
+                }
+                else {
+                    placeDigit += "-"
+                }
+            }
+        }
+        return placeDigit
+    }
 }
 
 // MARK: - UITextFieldDelegate
 extension MainVC: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-       if let nextField = textField.superview?.viewWithTag(textField.tag + 1) as? UITextField {
-          nextField.becomeFirstResponder()
-       } else {
-          fromTextField = textFieldMain.text ?? ""
-          textField.resignFirstResponder()
-       }
-       return false
+        if let nextField = textField.superview?.viewWithTag(textField.tag + 1) as? UITextField {
+            nextField.becomeFirstResponder()
+        } else {
+            self.data = [CellData.init(guess: textFieldMain.text ?? "", placeOfDigits: checkDigits(number: textFieldMain.text ?? ""))]
+            textField.resignFirstResponder()
+            self.tableViewGuess.reloadSections(NSIndexSet(index: 0) as IndexSet, with: .automatic)
+        }
+        return false
     }
 }
 

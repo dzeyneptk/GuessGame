@@ -29,6 +29,7 @@ class MainVC: UIViewController {
         super.viewDidLoad()
         configureTextField()
         configureTableView()
+        randomString = RandomNumber().fourDigitNumber
     }
     
     // MARK: - IBAction Functions
@@ -37,6 +38,7 @@ class MainVC: UIViewController {
         self.tableViewGuess.reloadData()
         randomString = RandomNumber().fourDigitNumber
         print(randomString)
+        textFieldMain.text = ""
         showToast(controller: self, message: "Let's start!", seconds: 2)
     }
     

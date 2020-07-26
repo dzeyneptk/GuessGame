@@ -55,15 +55,21 @@ class MainVC: UIViewController {
         self.textFieldMain.inputAccessoryView = toolbarDone
     }
     
+    private func containsDuplicateChar(string: String) -> Bool {
+        return !(string == string.removedDuplicates)
+    }
+    
     @objc private func doneClicked() {
         guard let textfield = textFieldMain.text else {return}
-        if isDigitNumberSame() && isUserEnteredNumber() {
+        if isDigitNumberSame(string: textfield) && isUserEnteredNumber() && !containsDuplicateChar(string: textfield){
             self.data.append(contentsOf: [CellData.init(guess: textfield, placeOfDigits: checkDigits(number: textfield))])
             self.tableViewGuess.reloadSections(NSIndexSet(index: 0) as IndexSet, with: .automatic)
-        } else if isDigitNumberSame() && !isUserEnteredNumber() || !isDigitNumberSame() && !isUserEnteredNumber()  {
+        } else if isDigitNumberSame(string: textfield) && !isUserEnteredNumber() || !isDigitNumberSame(string: textfield) && !isUserEnteredNumber()  {
             showToast(controller: self, message: AppConstant.toastMessage.enterNumber.description, seconds: 2)
-        } else if !isDigitNumberSame() && isUserEnteredNumber() {
+        } else if !isDigitNumberSame(string: textfield) && isUserEnteredNumber() {
             showToast(controller: self, message: AppConstant.toastMessage.enterFourDigit.description, seconds: 2)
+        } else if containsDuplicateChar(string: textfield) {
+            showToast(controller: self, message: AppConstant.toastMessage.duplicate.description, seconds: 2)
         }
         self.view.endEditing(true)
         textFieldMain.text = ""
@@ -97,10 +103,8 @@ class MainVC: UIViewController {
         return ""
     }
     
-    private func isDigitNumberSame() -> Bool {
-        guard let textfield = textFieldMain.text else {return false}
-        if (randomString.count == textfield.count) { return true }
-        else { return false }
+    private func isDigitNumberSame(string: String) -> Bool {
+        return randomString.count == string.count
     }
     
     private func isUserEnteredNumber() -> Bool {
@@ -139,5 +143,13 @@ extension MainVC: UITableViewDelegate, UITableViewDataSource {
         cell.textLabel?.textColor = UIColor.white
         cell.backgroundColor = UIColor.clear
         return cell
+    }
+}
+
+// MARK: - REMOVE DUPLICATE CHARACTERS EXTENSION
+extension RangeReplaceableCollection where Element: Hashable {
+    var removedDuplicates: Self {
+        var set = Set<Element>()
+        return filter{ set.insert($0).inserted }
     }
 }

@@ -12,8 +12,9 @@ struct AppConstant{
     static let numbers = "[Z0-9]"
     enum toastMessage: String {
         case enterFourDigit = "Please enter 4 digits!"
-        case enterNumber = "Plesa enter a number!"
+        case enterNumber = "Please enter a number!"
         case start = "Let's start!"
+        case duplicate = "Please don't enter duplicate numbers!"
         
         var description: String {
             return self.rawValue

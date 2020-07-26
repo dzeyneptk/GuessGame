@@ -73,6 +73,21 @@ class MainVC: UIViewController {
         return ""
     }
     
+    private func isDigitNumberSame() -> Bool {
+        guard let textfield = textFieldMain.text else {return false}
+        if (randomString.count == textfield.count) { return true }
+        else { return false }
+    }
+    
+    private func isUserEnteredNumber() -> Bool {
+        guard let textfield = textFieldMain.text else {return false}
+        if ((textfield.range(of: "[Z0-9]", options: .regularExpression, range: nil, locale: nil)) != nil) {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     private func showToast(controller: UIViewController, message: String, seconds: Double) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         alert.view.backgroundColor = UIColor.black
@@ -92,9 +107,15 @@ extension MainVC: UITextFieldDelegate {
             nextField.becomeFirstResponder()
         } else {
             guard let textfield = textFieldMain.text else {return false}
-            self.data.append(contentsOf: [CellData.init(guess: textfield, placeOfDigits: checkDigits(number: textfield))])
-            textField.resignFirstResponder()
-            self.tableViewGuess.reloadSections(NSIndexSet(index: 0) as IndexSet, with: .automatic)
+            if isDigitNumberSame() && isUserEnteredNumber() {
+                self.data.append(contentsOf: [CellData.init(guess: textfield, placeOfDigits: checkDigits(number: textfield))])
+                textField.resignFirstResponder()
+                self.tableViewGuess.reloadSections(NSIndexSet(index: 0) as IndexSet, with: .automatic)
+            } else if isDigitNumberSame() && !isUserEnteredNumber() || !isDigitNumberSame() && !isUserEnteredNumber()  {
+                showToast(controller: self, message: "Plesa enter a number!", seconds: 2)
+            } else if !isDigitNumberSame() && isUserEnteredNumber() {
+                showToast(controller: self, message: "Please enter 4 digits!", seconds: 2)
+            }
         }
         return false
     }

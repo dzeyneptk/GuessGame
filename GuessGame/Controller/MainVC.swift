@@ -39,13 +39,34 @@ class MainVC: UIViewController {
         randomString = RandomNumber().fourDigitNumber
         print(randomString)
         textFieldMain.text = ""
-        showToast(controller: self, message: "Let's start!", seconds: 2)
+        showToast(controller: self, message: AppConstant.toastMessage.start.description, seconds: 2)
     }
     
     // MARK: - Private Functions
     private func configureTextField() {
-        self.textFieldMain.delegate = self
+        let toolbarDone = UIToolbar.init()
+        toolbarDone.sizeToFit()
+        let doneButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.done,
+                                              target: self, action: #selector(MainVC.doneClicked))
+        toolbarDone.setItems([doneButton], animated: false)
         self.textFieldMain.tag = 0
+        self.textFieldMain.keyboardType = .numberPad
+        self.textFieldMain.returnKeyType = .done
+        self.textFieldMain.inputAccessoryView = toolbarDone
+    }
+    
+    @objc private func doneClicked() {
+        guard let textfield = textFieldMain.text else {return}
+        if isDigitNumberSame() && isUserEnteredNumber() {
+            self.data.append(contentsOf: [CellData.init(guess: textfield, placeOfDigits: checkDigits(number: textfield))])
+            self.tableViewGuess.reloadSections(NSIndexSet(index: 0) as IndexSet, with: .automatic)
+        } else if isDigitNumberSame() && !isUserEnteredNumber() || !isDigitNumberSame() && !isUserEnteredNumber()  {
+            showToast(controller: self, message: AppConstant.toastMessage.enterNumber.description, seconds: 2)
+        } else if !isDigitNumberSame() && isUserEnteredNumber() {
+            showToast(controller: self, message: AppConstant.toastMessage.enterFourDigit.description, seconds: 2)
+        }
+        self.view.endEditing(true)
+        textFieldMain.text = ""
     }
     
     private func configureTableView(){
@@ -53,24 +74,25 @@ class MainVC: UIViewController {
         self.tableViewGuess.dataSource = self
         self.tableViewGuess.tableHeaderView = labelPrevious
         self.tableViewGuess.backgroundColor = UIColor.clear
-        self.tableViewGuess.register(CustomCell.self, forCellReuseIdentifier: "custom")
+        self.tableViewGuess.register(CustomCell.self, forCellReuseIdentifier: AppConstant.cellType)
     }
     
     private func checkDigits(number: String?) -> String {
-        var placeDigit = ""
+        var placeDigitMinus = ""
+        var placeDigitPlus = ""
         guard let textfield = textFieldMain.text else {return ""}
         if (randomString.count == textfield.count) {
             for i in 0 ..< (randomString.count) {
                 if (randomString.contains(Array(textfield)[i])) {
                     if (Array(randomString)[i] == Array(textfield)[i]) {
-                        placeDigit += "+"
+                        placeDigitPlus += AppConstant.placeDigit.plus.description
                     }
                     else {
-                        placeDigit += "-"
+                        placeDigitMinus += AppConstant.placeDigit.minus.description
                     }
                 }
             }
-            return placeDigit
+            return placeDigitPlus + placeDigitMinus
         }
         return ""
     }
@@ -83,7 +105,7 @@ class MainVC: UIViewController {
     
     private func isUserEnteredNumber() -> Bool {
         guard let textfield = textFieldMain.text else {return false}
-        if ((textfield.range(of: "[Z0-9]", options: .regularExpression, range: nil, locale: nil)) != nil) {
+        if ((textfield.range(of: AppConstant.numbers.description, options: .regularExpression, range: nil, locale: nil)) != nil) {
             return true
         } else {
             return false
@@ -102,27 +124,6 @@ class MainVC: UIViewController {
     }
 }
 
-// MARK: - UITextFieldDelegate
-extension MainVC: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let nextField = textField.superview?.viewWithTag(textField.tag + 1) as? UITextField {
-            nextField.becomeFirstResponder()
-        } else {
-            guard let textfield = textFieldMain.text else {return false}
-            if isDigitNumberSame() && isUserEnteredNumber() {
-                self.data.append(contentsOf: [CellData.init(guess: textfield, placeOfDigits: checkDigits(number: textfield))])
-                textField.resignFirstResponder()
-                self.tableViewGuess.reloadSections(NSIndexSet(index: 0) as IndexSet, with: .automatic)
-            } else if isDigitNumberSame() && !isUserEnteredNumber() || !isDigitNumberSame() && !isUserEnteredNumber()  {
-                showToast(controller: self, message: "Plesa enter a number!", seconds: 2)
-            } else if !isDigitNumberSame() && isUserEnteredNumber() {
-                showToast(controller: self, message: "Please enter 4 digits!", seconds: 2)
-            }
-        }
-        return false
-    }
-}
-
 // MARK: - UITableViewDelegate, UITableViewDataSource
 extension MainVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -130,7 +131,7 @@ extension MainVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = self.tableViewGuess.dequeueReusableCell(withIdentifier: "custom") as! CustomCell
+        let cell = self.tableViewGuess.dequeueReusableCell(withIdentifier: AppConstant.cellType) as! CustomCell
         cell.guess = data[indexPath.row].guess
         cell.placesOfDigits = data[indexPath.row].placeOfDigits
         cell.textLabel?.lineBreakMode = .byWordWrapping

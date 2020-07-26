@@ -56,17 +56,21 @@ class MainVC: UIViewController {
     
     private func checkDigits(number: String?) -> String {
         var placeDigit = ""
-        for i in 0 ..< (randomString.count) {
-            if (randomString.contains(Array(textFieldMain.text ?? "")[i])) {
-                if (Array(randomString)[i] == Array(textFieldMain.text ?? "")[i]) {
-                    placeDigit += "+"
-                }
-                else {
-                    placeDigit += "-"
+        guard let textfield = textFieldMain.text else {return ""}
+        if (randomString.count == textfield.count) {
+            for i in 0 ..< (randomString.count) {
+                if (randomString.contains(Array(textfield)[i])) {
+                    if (Array(randomString)[i] == Array(textfield)[i]) {
+                        placeDigit += "+"
+                    }
+                    else {
+                        placeDigit += "-"
+                    }
                 }
             }
+            return placeDigit
         }
-        return placeDigit
+        return ""
     }
     
     private func showToast(controller: UIViewController, message: String, seconds: Double) {
@@ -87,7 +91,8 @@ extension MainVC: UITextFieldDelegate {
         if let nextField = textField.superview?.viewWithTag(textField.tag + 1) as? UITextField {
             nextField.becomeFirstResponder()
         } else {
-            self.data.append(contentsOf: [CellData.init(guess: textFieldMain.text ?? "", placeOfDigits: checkDigits(number: textFieldMain.text ?? ""))])
+            guard let textfield = textFieldMain.text else {return false}
+            self.data.append(contentsOf: [CellData.init(guess: textfield, placeOfDigits: checkDigits(number: textfield))])
             textField.resignFirstResponder()
             self.tableViewGuess.reloadSections(NSIndexSet(index: 0) as IndexSet, with: .automatic)
         }

@@ -16,11 +16,13 @@ class CustomCell: UITableViewCell {
     var guessView : UILabel = {
         var textView = UILabel()
         textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.textColor = UIColor.white
         return textView
     }()
     var placesOfDigitsView : UILabel = {
         var textView = UILabel()
         textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.textColor = UIColor.white
         return textView
     }()
     
